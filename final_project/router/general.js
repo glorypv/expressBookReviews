@@ -90,20 +90,36 @@ public_users.get('/isbn/:isbn', function (req, res) {
 public_users.get('/author/:author', function (req, res) {
   //Write your code here
   const author = req.params.author;
-  const booksByAuthor = Object.values(books).filter(book => book.author === author);
+  let bookPromise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const booksByAuthor = Object.values(books).filter(book => book.author === author);
 
-  if (booksByAuthor.length > 0) {
-    res.send(booksByAuthor);
-  } else {
-    res.status(404).send('No books found by this author.');
-  }
+      if (booksByAuthor.length > 0) {
+        resolve(booksByAuthor); // Resuelve la promesa con el libro encontrado
+      } else {
+        reject(new Error("Book not found")); // Rechaza la promesa si el libro no existe
+      }
+    }, 3000); // Simula un retraso de 3 segundos
+  });
+
+  bookPromise
+    .then((book) => {
+      res.status(200).json(book); // Devuelve el libro encontrado en formato JSON
+    })
+    .catch((error) => {
+      res.status(404).json({
+        message: error.message
+      }); // Maneja el error si el libro no existe
+    });
+
+
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
   //Write your code here
   const title = req.params.title;
- 
+
 
   let bookPromise = new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -122,7 +138,9 @@ public_users.get('/title/:title', function (req, res) {
       res.status(200).json(book); // Devuelve el libro encontrado en formato JSON
     })
     .catch((error) => {
-      res.status(404).json({ message: error.message }); // Maneja el error si el libro no existe
+      res.status(404).json({
+        message: error.message
+      }); // Maneja el error si el libro no existe
     });
 
 });
@@ -135,7 +153,7 @@ public_users.get('/review/:isbn', function (req, res) {
   let bookPromise = new Promise((resolve, reject) => {
     setTimeout(() => {
       let book = books[isbn].reviews; // Buscar el libro por ISBN
-      
+
       if (book) {
         resolve(book); // Resuelve la promesa con el libro encontrado
       } else {
@@ -149,7 +167,9 @@ public_users.get('/review/:isbn', function (req, res) {
       res.status(200).json(book); // Devuelve el libro encontrado en formato JSON
     })
     .catch((error) => {
-      res.status(404).json({ message: error.message }); // Maneja el error si el libro no existe
+      res.status(404).json({
+        message: error.message
+      }); // Maneja el error si el libro no existe
     });
 
 });
